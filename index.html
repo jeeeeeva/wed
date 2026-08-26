@@ -80,6 +80,7 @@
     justify-content:center;
     position:relative;
     overflow:hidden;
+    background:var(--maroon-deep);
   }
   .hero-video{
     position:absolute;
@@ -494,7 +495,7 @@
 
 <!-- ================= HERO ================= -->
 <section class="hero">
-  <video class="hero-video" src="assets/gallery-video.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto"></video>
+  <video id="hero-video" class="hero-video" src="assets/gallery-video.mp4" poster="assets/6.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto"></video>
   <div class="hero-overlay"></div>
   <div class="scroll-cue"><span>Scroll</span><div class="stem"></div></div>
 </section>
@@ -643,6 +644,39 @@
   </div>
   <div class="footer-note">With love and gratitude</div>
 </footer>
+
+<script>
+  // ---- Mobile autoplay reliability: some mobile browsers ignore the
+  // autoplay attribute unless muted is also set as a JS property, and
+  // some need a user-gesture nudge on the very first tap/scroll. ----
+  (function(){
+    const vid = document.getElementById('hero-video');
+    if(!vid) return;
+    vid.muted = true;
+    vid.playsInline = true;
+
+    function tryPlay(){
+      const p = vid.play();
+      if(p !== undefined){
+        p.catch(function(){
+          // Autoplay blocked — retry on the first user interaction.
+          const resume = function(){
+            vid.play();
+            window.removeEventListener('touchstart', resume);
+            window.removeEventListener('scroll', resume);
+          };
+          window.addEventListener('touchstart', resume, {once:true});
+          window.addEventListener('scroll', resume, {once:true});
+        });
+      }
+    }
+    tryPlay();
+
+    vid.addEventListener('error', function(){
+      console.error('Hero video failed to load — check that assets/gallery-video.mp4 was deployed and the path/case matches exactly.');
+    });
+  })();
+</script>
 
 <script>
   // ---- Countdown: placeholder target date, update once real date is set ----
